@@ -4,27 +4,25 @@ import me.refluxo.moduleloader.ModuleLoader;
 import me.refluxo.moduleloader.module.Module;
 import me.refluxo.moduleloader.module.ModuleManager;
 import me.refluxo.moduleloader.module.PluginModule;
+import me.refluxo.moduleloader.service.ServiceRegistry;
 import me.refluxo.moduleloader.util.mysql.MySQLService;
-import me.refluxo.translation.util.TranslationUtil;
+import me.refluxo.translation.util.CraftTranslationUtil;
+import me.refluxo.translation.util.Translator;
 import org.bukkit.plugin.Plugin;
 
 @Module(moduleName = "TranslationModule")
 public class TranslationModule extends PluginModule {
 
-    private static TranslationUtil tu;
+
 
     @Override
     public void enableModule() {
-        tu = new TranslationUtil();
+        ServiceRegistry.registerService(Translator.class, new CraftTranslationUtil(this));
     }
 
     @Override
     public void disableModule() {
 
-    }
-
-    public static TranslationUtil getTranslationUtil() {
-        return tu;
     }
 
     @Override

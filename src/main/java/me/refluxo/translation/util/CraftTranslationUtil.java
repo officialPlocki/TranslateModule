@@ -1,5 +1,6 @@
 package me.refluxo.translation.util;
 
+import lombok.SneakyThrows;
 import me.refluxo.translation.TranslationModule;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -11,19 +12,21 @@ import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class TranslationUtil {
+public class CraftTranslationUtil implements Translator {
 
+    private final TranslationModule translationModule;
+
+    public CraftTranslationUtil(TranslationModule translationModule) {
+        this.translationModule = translationModule;
+    }
+
+    @Override
     public String getTranslation(Player player, String key, String defaultGermanTranslation) {
         String rKey = key.replaceAll("\\.", "_");
         if(!containsKey(rKey)) {
             insertKey(rKey, defaultGermanTranslation);
         }
-        try {
-            return getTranslation(rKey, getLanguage(player));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return "ERROR, PLEASE REJOIN";
+        return getTranslation(rKey, getLanguage(player));
     }
 
     private void insertKey(String key, String germanTranslation) {
@@ -37,19 +40,20 @@ public class TranslationUtil {
             assert obj != null;
             if(!obj.isEmpty()) {
                 String text = obj.getString("text");
-                new TranslationModule().getMySQLService().executeUpdate("INSERT INTO languageKeys(key,language,translation) VALUES ('" + key + "','" + l.name() + "','" + text + "');");
+                translationModule.getMySQLService().executeUpdate("INSERT INTO languageKeys(key,language,translation) VALUES ('" + key + "','" + l.name() + "','" + text + "');");
             }
         }
     }
 
+    @Override
     public void updateLanguage(Player player, Lang lang) {
-        new TranslationModule().getMySQLService().executeUpdate("CREATE TABLE IF NOT EXISTS playerLang(uuid TEXT, language TEXT);");
-        new TranslationModule().getMySQLService().executeUpdate("UPDATE playerLang SET language = '" + lang.name() + "' WHERE uuid = '" + player.getUniqueId() + "';");
+        translationModule.getMySQLService().executeUpdate("CREATE TABLE IF NOT EXISTS playerLang(uuid TEXT, language TEXT);");
+        translationModule.getMySQLService().executeUpdate("UPDATE playerLang SET language = '" + lang.name() + "' WHERE uuid = '" + player.getUniqueId() + "';");
     }
 
     private String getTranslation(@NotNull String key, @NotNull Lang lang) {
-        new TranslationModule().getMySQLService().executeUpdate("CREATE TABLE IF NOT EXISTS languageKeys(key TEXT, language TEXT, translation TEXT);");
-        ResultSet rs = new TranslationModule().getMySQLService().getResult("SELECT * FROM languageKeys WHERE key = '" + key + "' AND language = '" + lang.name() + "';");
+        translationModule.getMySQLService().executeUpdate("CREATE TABLE IF NOT EXISTS languageKeys(key TEXT, language TEXT, translation TEXT);");
+        ResultSet rs = translationModule.getMySQLService().getResult("SELECT * FROM languageKeys WHERE key = '" + key + "' AND language = '" + lang.name() + "';");
         try {
             if(rs.next()) {
                 return rs.getString("translation");
@@ -63,23 +67,21 @@ public class TranslationUtil {
     }
 
     private boolean containsKey(String key) {
-        new TranslationModule().getMySQLService().executeUpdate("CREATE TABLE IF NOT EXISTS languageKeys(key TEXT, language TEXT, translation TEXT);");
-        ResultSet rs = new TranslationModule().getMySQLService().getResult("SELECT * FROM languageKeys WHERE key = '" + key + "';");
+        translationModule.getMySQLService().executeUpdate("CREATE TABLE IF NOT EXISTS languageKeys(key TEXT, language TEXT, translation TEXT);");
+        ResultSet rs = translationModule.getMySQLService().getResult("SELECT * FROM languageKeys WHERE key = '" + key + "';");
         try {
-            if(rs.next()) {
-                return true;
-            } else {
-                return false;
-            }
+            return rs.next();
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return true;
     }
 
-    public Lang getLanguage(Player player) throws SQLException {
-        new TranslationModule().getMySQLService().executeUpdate("CREATE TABLE IF NOT EXISTS playerLang(uuid TEXT, language TEXT);");
-        ResultSet rs = new TranslationModule().getMySQLService().getResult("SELECT * FROM playerLang WHERE uuid = '" + player.getUniqueId() + "';");
+    @Override
+    @SneakyThrows
+    public Lang getLanguage(Player player) {
+        translationModule.getMySQLService().executeUpdate("CREATE TABLE IF NOT EXISTS playerLang(uuid TEXT, language TEXT);");
+        ResultSet rs = translationModule.getMySQLService().getResult("SELECT * FROM playerLang WHERE uuid = '" + player.getUniqueId() + "';");
         if(rs.next()) {
             return Lang.valueOf(rs.getString("language"));
         } else {
@@ -88,7 +90,7 @@ public class TranslationUtil {
             player.sendMessage("§b§lTranslations §8» §7Ta langue a été configurée en anglais. Configure-la avec /language.");
             player.sendMessage("§b§lTranslations §8» §7Uw taal is ingesteld op Engels. Configureer het met /language.");
             player.sendMessage("§b§lTranslations §8» §7Su idioma se ha establecido en inglés. Configúralo con /language.");
-            new TranslationModule().getMySQLService().executeUpdate("INSERT INTO playerLang(uuid,language) VALUES ('" + player.getUniqueId() + "','EN');");
+            translationModule.getMySQLService().executeUpdate("INSERT INTO playerLang(uuid,language) VALUES ('" + player.getUniqueId() + "','EN');");
             return Lang.EN;
         }
     }

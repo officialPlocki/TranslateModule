@@ -1,12 +1,13 @@
 package me.refluxo.translation.command;
 
-import me.refluxo.moduleloader.module.Command;
-import me.refluxo.moduleloader.module.Listener;
 import me.refluxo.moduleloader.module.ModuleCommand;
+import me.refluxo.moduleloader.module.ModuleListener;
+import me.refluxo.moduleloader.module.ModuleCommandExecutor;
+import me.refluxo.moduleloader.service.ServiceRegistry;
 import me.refluxo.moduleloader.util.inventory.ItemUtil;
 import me.refluxo.moduleloader.util.inventory.PlayerHead;
-import me.refluxo.translation.TranslationModule;
 import me.refluxo.translation.util.Lang;
+import me.refluxo.translation.util.Translator;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -21,14 +22,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Listener
-@Command(command = "language", description = "A command to change the player language", aliases = {"lang", "langs"}, permissions = {}, tabCompleterIsEnabled = true, usage = "/language <LANGUAGE>")
-public class LanguageCommand extends ModuleCommand implements org.bukkit.event.Listener {
+@ModuleListener
+@ModuleCommand(command = "language", description = "A command to change the player language", aliases = {"lang", "langs"}, permissions = {}, tabCompleterIsEnabled = true, usage = "/language <LANGUAGE>")
+public class LanguageCommand extends ModuleCommandExecutor implements org.bukkit.event.Listener {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        var translator = ServiceRegistry.access(Translator.class);
         if (args.length != 1) {
-            Inventory inventory = Bukkit.createInventory(null, InventoryType.DROPPER, Component.text("§e§l" + TranslationModule.getTranslationUtil().getTranslation((Player) sender, "translation.module.gui.command.language.title", "Übersetzungen")).asComponent());
+            Inventory inventory = Bukkit.createInventory(null, InventoryType.DROPPER, Component.text("§e§l" + translator.getTranslation((Player) sender, "translation.module.gui.command.language.title", "Übersetzungen")).asComponent());
             inventory.setItem(0, new ItemUtil("§e§lDeutsch", PlayerHead.getItemStackWithTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWU3ODk5YjQ4MDY4NTg2OTdlMjgzZjA4NGQ5MTczZmU0ODc4ODY0NTM3NzQ2MjZiMjRiZDhjZmVjYzc3YjNmIn19fQ=="), "", "§bWechsle die Sprache auf §e§lDeutsch", "").buildItem());
             inventory.setItem(1, new ItemUtil("§c§lEnglish", PlayerHead.getItemStackWithTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmNiYzMyY2IyNGQ1N2ZjZGMwMzFlODUxMjM1ZGEyZGFhZDNlMTkxNGI4NzA0M2JkMDEyNjMzZTZmMzJjNyJ9fX0="), "", "§bSwitch the language to §c§lEnglish", "").buildItem());
             inventory.setItem(2, new ItemUtil("§f§lFrancés", PlayerHead.getItemStackWithTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTEyNjlhMDY3ZWUzN2U2MzYzNWNhMWU3MjNiNjc2ZjEzOWRjMmRiZGRmZjk2YmJmZWY5OWQ4YjM1Yzk5NmJjIn19fQ=="), "", "§bCambiar el idioma a §f§lFrancés", "").buildItem());
@@ -36,31 +38,32 @@ public class LanguageCommand extends ModuleCommand implements org.bukkit.event.L
             inventory.setItem(4, new ItemUtil("§6§lEspañol", PlayerHead.getItemStackWithTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzJiZDQ1MjE5ODMzMDllMGFkNzZjMWVlMjk4NzQyODc5NTdlYzNkOTZmOGQ4ODkzMjRkYThjODg3ZTQ4NWVhOCJ9fX0="), "", "§bCambiar el idioma a §6§lEspañol", "").buildItem());
             ((Player) sender).openInventory(inventory);
         } else {
-            sender.sendMessage("§b§lTranslations §8» §7" + TranslationModule.getTranslationUtil().getTranslation((Player) sender, "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.valueOf(args[0]).name()));
+            sender.sendMessage("§b§lTranslations §8» §7" + translator.getTranslation((Player) sender, "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.valueOf(args[0]).name()));
         }
         return false;
     }
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if(Objects.requireNonNull(event.getView().title().insertion()).equalsIgnoreCase("§e§l" + TranslationModule.getTranslationUtil().getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.title", "Übersetzungen"))) {
+        var translator = ServiceRegistry.access(Translator.class);
+        if(Objects.requireNonNull(event.getView().title().insertion()).equalsIgnoreCase("§e§l" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.title", "Übersetzungen"))) {
             if(event.getCurrentItem() != null) {
                 event.setCancelled(true);
                 if(Objects.requireNonNull(event.getCurrentItem().getI18NDisplayName()).equalsIgnoreCase("§e§lDeutsch")) {
-                    TranslationModule.getTranslationUtil().updateLanguage((Player) event.getWhoClicked(), Lang.DE);
-                    event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + TranslationModule.getTranslationUtil().getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.DE.name()));
+                    translator.updateLanguage((Player) event.getWhoClicked(), Lang.DE);
+                    event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.DE.name()));
                 } else if(event.getCurrentItem().getI18NDisplayName().equalsIgnoreCase("§c§lEnglish")) {
-                    TranslationModule.getTranslationUtil().updateLanguage((Player) event.getWhoClicked(), Lang.EN);
-                    event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + TranslationModule.getTranslationUtil().getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.EN.name()));
+                    translator.updateLanguage((Player) event.getWhoClicked(), Lang.EN);
+                    event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.EN.name()));
                 } else if(event.getCurrentItem().getI18NDisplayName().equalsIgnoreCase("§f§lFrancés")) {
-                    TranslationModule.getTranslationUtil().updateLanguage((Player) event.getWhoClicked(), Lang.FR);
-                    event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + TranslationModule.getTranslationUtil().getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.FR.name()));
+                    translator.updateLanguage((Player) event.getWhoClicked(), Lang.FR);
+                    event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.FR.name()));
                 } else if(event.getCurrentItem().getI18NDisplayName().equalsIgnoreCase("§b§lNederlands")) {
-                    TranslationModule.getTranslationUtil().updateLanguage((Player) event.getWhoClicked(), Lang.NL);
-                    event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + TranslationModule.getTranslationUtil().getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.NL.name()));
+                    translator.updateLanguage((Player) event.getWhoClicked(), Lang.NL);
+                    event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.NL.name()));
                 } else if(event.getCurrentItem().getI18NDisplayName().equalsIgnoreCase("§6§lEspañol")) {
-                    TranslationModule.getTranslationUtil().updateLanguage((Player) event.getWhoClicked(), Lang.ES);
-                    event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + TranslationModule.getTranslationUtil().getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.ES.name()));
+                    translator.updateLanguage((Player) event.getWhoClicked(), Lang.ES);
+                    event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.ES.name()));
 
                 }
             }
