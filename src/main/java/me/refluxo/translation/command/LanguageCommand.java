@@ -3,11 +3,10 @@ package me.refluxo.translation.command;
 import me.refluxo.moduleloader.module.ModuleCommand;
 import me.refluxo.moduleloader.module.ModuleListener;
 import me.refluxo.moduleloader.module.ModuleCommandExecutor;
-import me.refluxo.moduleloader.service.ServiceRegistry;
 import me.refluxo.moduleloader.util.inventory.ItemUtil;
 import me.refluxo.moduleloader.util.inventory.PlayerHead;
 import me.refluxo.translation.util.Lang;
-import me.refluxo.translation.util.Translator;
+import me.refluxo.translation.util.TranslationUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -28,7 +27,7 @@ public class LanguageCommand extends ModuleCommandExecutor implements org.bukkit
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        var translator = ServiceRegistry.access(Translator.class);
+        var translator = new TranslationUtil();
         if (args.length != 1) {
             Inventory inventory = Bukkit.createInventory(null, InventoryType.DROPPER, Component.text("§e§l" + translator.getTranslation((Player) sender, "translation.module.gui.command.language.title", "Übersetzungen")).asComponent());
             inventory.setItem(0, new ItemUtil("§e§lDeutsch", PlayerHead.getItemStackWithTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWU3ODk5YjQ4MDY4NTg2OTdlMjgzZjA4NGQ5MTczZmU0ODc4ODY0NTM3NzQ2MjZiMjRiZDhjZmVjYzc3YjNmIn19fQ=="), "", "§bWechsle die Sprache auf §e§lDeutsch", "").buildItem());
@@ -45,7 +44,7 @@ public class LanguageCommand extends ModuleCommandExecutor implements org.bukkit
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        var translator = ServiceRegistry.access(Translator.class);
+        var translator = new TranslationUtil();
         if(Objects.requireNonNull(event.getView().title().insertion()).equalsIgnoreCase("§e§l" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.title", "Übersetzungen"))) {
             if(event.getCurrentItem() != null) {
                 event.setCancelled(true);
