@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -19,11 +20,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @ModuleListener
 @ModuleCommand(command = "language", description = "A command to change the player language", aliases = {"lang", "langs"}, permissions = {}, tabCompleterIsEnabled = true, usage = "/language <LANGUAGE>")
-public class LanguageCommand extends ModuleCommandExecutor implements org.bukkit.event.Listener {
+public class LanguageCommand extends ModuleCommandExecutor implements Listener {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -45,25 +45,29 @@ public class LanguageCommand extends ModuleCommandExecutor implements org.bukkit
     @EventHandler
     public void onClick(InventoryClickEvent event) {
         var translator = new TranslationUtil();
-        if(Objects.requireNonNull(event.getView().title().insertion()).equalsIgnoreCase("§e§l" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.title", "Übersetzungen"))) {
+        if(event.getView().getTitle().equalsIgnoreCase("§e§l" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.title", "Übersetzungen"))) {
             if(event.getCurrentItem() != null) {
                 event.setCancelled(true);
-                if(Objects.requireNonNull(event.getCurrentItem().getI18NDisplayName()).equalsIgnoreCase("§e§lDeutsch")) {
+                if(event.getCurrentItem().getItemMeta().getDisplayName().equalsIgnoreCase("§e§lDeutsch")) {
                     translator.updateLanguage((Player) event.getWhoClicked(), Lang.DE);
                     event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.DE.name()));
-                } else if(event.getCurrentItem().getI18NDisplayName().equalsIgnoreCase("§c§lEnglish")) {
+                    event.getWhoClicked().closeInventory();
+                } else if(event.getCurrentItem().getItemMeta().getDisplayName().equalsIgnoreCase("§c§lEnglish")) {
                     translator.updateLanguage((Player) event.getWhoClicked(), Lang.EN);
                     event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.EN.name()));
-                } else if(event.getCurrentItem().getI18NDisplayName().equalsIgnoreCase("§f§lFrancés")) {
+                    event.getWhoClicked().closeInventory();
+                } else if(event.getCurrentItem().getItemMeta().getDisplayName().equalsIgnoreCase("§f§lFrancés")) {
                     translator.updateLanguage((Player) event.getWhoClicked(), Lang.FR);
                     event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.FR.name()));
-                } else if(event.getCurrentItem().getI18NDisplayName().equalsIgnoreCase("§b§lNederlands")) {
+                    event.getWhoClicked().closeInventory();
+                } else if(event.getCurrentItem().getItemMeta().getDisplayName().equalsIgnoreCase("§b§lNederlands")) {
                     translator.updateLanguage((Player) event.getWhoClicked(), Lang.NL);
                     event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.NL.name()));
-                } else if(event.getCurrentItem().getI18NDisplayName().equalsIgnoreCase("§6§lEspañol")) {
+                    event.getWhoClicked().closeInventory();
+                } else if(event.getCurrentItem().getItemMeta().getDisplayName().equalsIgnoreCase("§6§lEspañol")) {
                     translator.updateLanguage((Player) event.getWhoClicked(), Lang.ES);
                     event.getWhoClicked().sendMessage("§b§lTranslations §8» §7" + translator.getTranslation((Player) event.getWhoClicked(), "translation.module.gui.command.language.changed", "Du hast deine Sprache auf %language% gewechselt.").replaceAll("%language%", Lang.ES.name()));
-
+                    event.getWhoClicked().closeInventory();
                 }
             }
         }
