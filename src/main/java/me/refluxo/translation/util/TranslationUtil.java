@@ -3,16 +3,12 @@ package me.refluxo.translation.util;
 import me.refluxo.translation.TranslationModule;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 public class TranslationUtil {
 
@@ -33,18 +29,15 @@ public class TranslationUtil {
     }
 
     private void insertKey(String key, String germanTranslation) {
+        HashMap<Lang, String> map = null;
+        try {
+            map = new AzureTranslate().getTranslations(germanTranslation);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         for(Lang l : Lang.values()) {
-            JSONArray obj = null;
-            try {
-                obj = readJsonFromUrl("https://api-free.deepl.com/v2/translate?auth_key=5f0cf57e-1314-c2ed-5f64-94047ccde4e7:fx&text=" + URLReplacements.encodeURIComponent(germanTranslation) + "&target_lang=" + l.name());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            assert obj != null;
-            if(!obj.isEmpty()) {
-                String text = URLReplacements.decodeURIComponent((String) obj.getJSONObject(0).get("text"));
-                translationModule.getMySQLService().executeUpdate("INSERT INTO languageKeys(langKeys,language,translation) VALUES ('" + key + "','" + l.name() + "','" + text + "');");
-            }
+            assert map != null;
+            translationModule.getMySQLService().executeUpdate("INSERT INTO languageKeys(langKeys,language,translation) VALUES ('" + key + "','" + l.name() + "','" + map.get(l) + "');");
         }
     }
 
@@ -104,36 +97,12 @@ public class TranslationUtil {
     }
 
     public String translateSingleTime(String string, Lang lang) {
-        JSONArray obj = null;
         try {
-            obj = readJsonFromUrl("https://api-free.deepl.com/v2/translate?auth_key=5f0cf57e-1314-c2ed-5f64-94047ccde4e7:fx&text=" + URLReplacements.encodeURIComponent(string) + "&target_lang=" + lang.name());
+            return new AzureTranslate().getTranslation(lang.name().toLowerCase(), string);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        assert obj != null;
-        if(!obj.isEmpty()) {
-            return URLReplacements.decodeURIComponent((String) obj.getJSONObject(0).get("text"));
-        }
         return "";
-    }
-
-    private String readAll(Reader rd) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        int cp;
-        while ((cp = rd.read()) != -1) {
-            sb.append((char) cp);
-        }
-        return sb.toString();
-    }
-
-    private JSONArray readJsonFromUrl(String url) throws IOException {
-        URLConnection conn = new URL(url).openConnection();
-        conn.setConnectTimeout(99999);
-        conn.setReadTimeout(99999);
-        try (InputStream is = conn.getInputStream()) {
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            return new JSONObject(readAll(rd)).getJSONArray("translations");
-        }
     }
 
 }
