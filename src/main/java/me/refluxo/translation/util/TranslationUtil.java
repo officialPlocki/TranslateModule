@@ -28,6 +28,26 @@ public class TranslationUtil {
         return getTranslation(rKey, getLanguage(player));
     }
 
+    /**
+     *
+     * @param player
+     * @param key
+     * @param defaultGermanTranslation
+     * @param replacements do %p for placeholder in text and put the replacements for the placeholders in the replacements String List
+     * @return
+     */
+    public String getTranslation(Player player, String key, String defaultGermanTranslation, String... replacements) {
+        String rKey = key.replaceAll("\\.", "_");
+        if(!containsKey(rKey)) {
+            insertKey(rKey, defaultGermanTranslation);
+        }
+        String trans = getTranslation(rKey, getLanguage(player));
+        for (String replacement : replacements) {
+            trans = trans.replaceFirst("%p", replacement);
+        }
+        return trans;
+    }
+
     private void insertKey(String key, String germanTranslation) {
         HashMap<Lang, String> map = null;
         try {
