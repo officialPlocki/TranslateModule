@@ -22,21 +22,41 @@ public class TranslationModule extends PluginModule {
 
     }
 
+    /**
+     * Returns the module loader for this module
+     *
+     * @return The ModuleLoader that is associated with the current class loader.
+     */
     @Override
     public ModuleLoader getModuleLoader() {
         return super.getModuleLoader();
     }
 
+    /**
+     * Returns the MySQLService object
+     *
+     * @return The MySQLService object.
+     */
     @Override
     public MySQLService getMySQLService() {
         return super.getMySQLService();
     }
 
+    /**
+     * Returns the module manager
+     *
+     * @return The ModuleManager instance that is associated with the current application.
+     */
     @Override
     public ModuleManager getModuleManager() {
         return super.getModuleManager();
     }
 
+    /**
+     * Returns the plugin that this class is a part of
+     *
+     * @return The plugin that is being used.
+     */
     @Override
     public Plugin getPlugin() {
         return super.getPlugin();

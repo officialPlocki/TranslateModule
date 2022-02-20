@@ -13,6 +13,13 @@ import java.util.HashMap;
 
 public class AzureTranslate {
 
+    /**
+     * It takes a string and a language code as input, and returns the translated string
+     *
+     * @param lang The language to translate to.
+     * @param text The text to translate.
+     * @return The translated text.
+     */
     public String getTranslation(String lang, String text) throws IOException {
         OkHttpClient client = new OkHttpClient();
         HttpUrl url = new HttpUrl.Builder()
@@ -37,6 +44,12 @@ public class AzureTranslate {
         return array.getJSONObject(0).getString("text");
     }
 
+    /**
+     * It takes a string and returns a map of languages to translations
+     *
+     * @param text The text to translate.
+     * @return A HashMap with the translations of the text.
+     */
     public HashMap<Lang, String> getTranslations(String text) throws IOException {
         OkHttpClient client = new OkHttpClient();
         HttpUrl url = new HttpUrl.Builder()
@@ -71,10 +84,22 @@ public class AzureTranslate {
         return map;
     }
 
+    /**
+     * Replace the last occurence of a pattern in a string
+     *
+     * @param text The text to be processed.
+     * @return The text with the last square bracket removed.
+     */
     private String replaceLast(String text) {
         return text.replaceFirst("(?s)"+ "\\]" +"(?!.*?"+ "\\]" +")", "");
     }
 
+    /**
+     * It takes a string of JSON text and returns a string of prettified JSON text
+     *
+     * @param json_text The JSON string to prettify.
+     * @return The prettified JSON string.
+     */
     private String prettify(String json_text) {
         JsonParser parser = new JsonParser();
         JsonElement json = parser.parse(json_text);

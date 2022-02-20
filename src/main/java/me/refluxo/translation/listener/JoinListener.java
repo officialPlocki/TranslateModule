@@ -9,6 +9,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 @ModuleListener
 public class JoinListener implements Listener {
 
+    /**
+     * This function is called when a player joins the server.
+     *
+     * @param event The event that is being called.
+     */
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         new TranslationUtil().getLanguage(event.getPlayer());

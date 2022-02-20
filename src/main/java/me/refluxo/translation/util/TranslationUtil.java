@@ -12,14 +12,24 @@ import java.util.HashMap;
 
 public class TranslationUtil {
 
+    // A singleton.
     private final TranslationModule translationModule;
 
-    public TranslationUtil() {
+   // It creates a new TranslationModule and connects to the database.
+     public TranslationUtil() {
         this.translationModule = new TranslationModule();
         translationModule.getMySQLService().executeUpdate("CREATE TABLE IF NOT EXISTS languageKeys(langKeys TEXT, language TEXT, translation TEXT);");
         translationModule.getMySQLService().executeUpdate("CREATE TABLE IF NOT EXISTS playerLang(uuid TEXT, language TEXT);");
     }
 
+    /**
+     * If the key is not in the dictionary, add it with the default translation
+     *
+     * @param player The player who's language we're getting
+     * @param key The key to look up.
+     * @param defaultGermanTranslation The default translation if the key is not found.
+     * @return The translation of the key.
+     */
     public String getTranslation(Player player, String key, String defaultGermanTranslation) {
         String rKey = key.replaceAll("\\.", "_");
         if(!containsKey(rKey)) {
@@ -48,6 +58,12 @@ public class TranslationUtil {
         return trans;
     }
 
+    /**
+     * Inserts a key and its translation into the database
+     *
+     * @param key The key to be inserted into the database.
+     * @param germanTranslation The German translation of the key.
+     */
     private void insertKey(String key, String germanTranslation) {
         HashMap<Lang, String> map = null;
         try {
@@ -61,10 +77,23 @@ public class TranslationUtil {
         }
     }
 
+    /**
+     * It updates the player's language in the database
+     *
+     * @param player The player that is being updated.
+     * @param lang The language you want to set the player to.
+     */
     public void updateLanguage(Player player, Lang lang) {
         translationModule.getMySQLService().executeUpdate("UPDATE playerLang SET language = '" + lang.name() + "' WHERE uuid = '" + player.getUniqueId() + "';");
     }
 
+    /**
+     * It takes a key and a language and returns the translation of the key in that language
+     *
+     * @param key The key of the translation you want to get.
+     * @param lang The language you want to translate to.
+     * @return A String.
+     */
     private String getTranslation(@NotNull String key, @NotNull Lang lang) {
         try (Connection connection = translationModule.getMySQLService().getConnection()){
             ResultSet rs =  connection.prepareStatement("SELECT * FROM languageKeys WHERE langKeys = '" + key + "' AND language = '" + lang.name() + "';").executeQuery();
@@ -79,6 +108,12 @@ public class TranslationUtil {
         return null;
     }
 
+    /**
+     * This function checks if the key is in the database
+     *
+     * @param key The key to check for.
+     * @return A boolean value.
+     */
     private boolean containsKey(String key) {
         try (Connection connection = translationModule.getMySQLService().getConnection()){
             ResultSet rs =  connection.prepareStatement("SELECT * FROM languageKeys WHERE langKeys = '" + key + "';").executeQuery();
@@ -96,6 +131,12 @@ public class TranslationUtil {
         return false;
     }
 
+    /**
+     * It gets the language of the player from the database
+     *
+     * @param player The player who's language is being changed.
+     * @return The language of the player.
+     */
     public Lang getLanguage(Player player) {
         try (Connection connection = translationModule.getMySQLService().getConnection()){
             ResultSet rs =  connection.prepareStatement("SELECT * FROM playerLang WHERE uuid = '" + player.getUniqueId() + "';").executeQuery();
@@ -116,6 +157,13 @@ public class TranslationUtil {
         return Lang.EN;
     }
 
+    /**
+     * It takes a string and a language, and returns the translation of the string into the language
+     *
+     * @param string The string to translate.
+     * @param lang The language to translate to.
+     * @return The translated string.
+     */
     public String translateSingleTime(String string, Lang lang) {
         try {
             return new AzureTranslate().getTranslation(lang.name().toLowerCase(), string);

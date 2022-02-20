@@ -25,6 +25,15 @@ import java.util.List;
 @ModuleCommand(command = "language", description = "A command to change the player language", aliases = {"lang", "langs"}, permissions = {}, tabCompleterIsEnabled = true, usage = "/language <LANGUAGE>")
 public class LanguageCommand extends ModuleCommandExecutor implements Listener {
 
+    /**
+     * This function is called when the player uses the command /translations
+     *
+     * @param sender The player who executed the command.
+     * @param command The command that is executed.
+     * @param label The name of the command.
+     * @param args The arguments that were passed to the command.
+     * @return Nothing.
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String label, @NotNull String[] args) {
         var translator = new TranslationUtil();
@@ -42,6 +51,11 @@ public class LanguageCommand extends ModuleCommandExecutor implements Listener {
         return false;
     }
 
+    /**
+     * This function is called when the player clicks on the "§e§lÜbersetzungen" button in the GUI
+     *
+     * @param event The event that was triggered.
+     */
     @EventHandler
     public void onClick(InventoryClickEvent event) {
         var translator = new TranslationUtil();
@@ -73,6 +87,31 @@ public class LanguageCommand extends ModuleCommandExecutor implements Listener {
         }
     }
 
+    /**
+     * This function is called when the user presses tab after the command.
+     *
+     * It returns a list of possible completions for the command.
+     *
+     * The list of completions is used to give the user a list of possible completions for the command.
+     *
+     * The list of completions is a list of strings.
+     *
+     * The list of completions is used to give the user a list of possible completions for the command.
+     *
+     * The list of completions is a list of strings.
+     *
+     * The list of completions is used to give the user a list of possible completions for the command.
+     *
+     * The list of completions is a list of strings.
+     *
+     * The list of completions is used to give the user a list of possible completions for the command.
+     *
+     * The list of completions is a list of strings.
+     *
+     * The list of completions is used to give the user a list of
+     *
+     * @return A list of strings.
+     */
     @Override
     public List<String> getTabCompletions(String[] args) {
         List<String> completions = new ArrayList<>();
